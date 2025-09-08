@@ -1,29 +1,28 @@
-Zingo - Food Delivery App
-Zingo is a full-stack food delivery application built with the MERN stack (MongoDB, Express, React, Node.js). It allows users to browse restaurants, add items to their cart, place orders, and track deliveries in real-time.
+# Zingo - Food Delivery App
 
-Features
-User authentication and authorization
-Restaurant and item management
-Cart and checkout system
-Order history and tracking
-Delivery assignment and live tracking
-Email-based password reset
-Payment gateway integration
-Owner and delivery dashboards
-Tech Stack
-Frontend: React, Redux, Vite
-Backend: Node.js, Express, MongoDB
-Real-time: Socket.io for live order tracking
-Other: Google Maps, Razorpay, Cloudinary, Firebase
-Folder Structure
-frontend - React client app
-backend - Node.js/Express server, REST API, Socket.io
-models/ - Mongoose models for users, orders, items, shops, delivery assignments
-controllers/ - Business logic for authentication, items, orders, shops, users
-routes/ - API endpoints
-middlewares/ - Auth, file upload, etc.
-How It Works
-Users sign up, browse shops and items, add to cart, and place orders.
-Owners manage shops and items, view orders, and track deliveries.
-Delivery boys get assigned orders and update delivery status in real-time.
-All users can track their orders live on a map.
+Zingo is a **full-stack food delivery application** built with the **MERN stack** (MongoDB, Express, React, Node.js).  
+It allows users to browse restaurants, add items to their cart, place orders, and track deliveries in real-time.
+
+---
+
+## 🚀 Features
+- User authentication and authorization  
+- Restaurant and item management  
+- Cart and checkout system  
+- Order history and tracking  
+- Delivery assignment and live tracking  
+- Email-based password reset  
+- Payment gateway integration  
+- Owner and delivery dashboards  
+
+---
+
+## 🛠 Tech Stack
+**Frontend:** React, Redux, Vite  
+**Backend:** Node.js, Express, MongoDB  
+**Real-time:** Socket.io (for live order tracking)  
+**Other:** Google Maps, Razorpay, Cloudinary, Firebase  
+
+---
+
+## 📂 Folder Structure
