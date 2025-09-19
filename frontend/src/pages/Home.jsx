@@ -1,5 +1,5 @@
 import { useSelector } from "react-redux"
-import UserDashboard from "../components/userDashboard"
+import UserDashboard from "../components/UserDashboard"
 import DeliveryBoy from "../components/deliveryBoy"
 import OwnerDashboard from "../components/OwnerDashboard"
 import { Footer } from "../components/Footer"
