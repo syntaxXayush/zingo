@@ -1,7 +1,7 @@
 import React from "react";
 import { useSelector, useDispatch } from "react-redux";
 import axios from "axios";
-import { serverUrl } from "../App";
+import { serverUrl } from "../utils/config";
 import { MdKeyboardBackspace } from "react-icons/md";
 import {
   MdLocationOn,

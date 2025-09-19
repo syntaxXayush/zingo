@@ -1,12 +1,12 @@
 import axios from 'axios'
 import React, { useEffect } from 'react'
-import { serverUrl } from '../App'
+import { serverUrl } from '../utils/config'
 import { useDispatch, useSelector } from 'react-redux'
-import { setAllShops, setShop, setUserData } from '../redux/userSlice'
+import { setShop } from '../redux/userSlice'
 
-function getCurrentShop() {
+function useCurrentShop() {
 const dispatch=useDispatch()
-const {userData,city}=useSelector(state=>state.user)
+const {userData}=useSelector(state=>state.user)
 useEffect(()=>{
     if(userData?.role=="owner"){
 const fetchShop=async ()=>{
@@ -17,7 +17,7 @@ const fetchShop=async ()=>{
  fetchShop() 
     }
  
-},[userData])
+}, [userData, dispatch])
 }
 
-export default getCurrentShop
+export default useCurrentShop

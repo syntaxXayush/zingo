@@ -5,13 +5,18 @@ import User from "../models/user.model.js"
 export const getCurrentUser=async (req,res)=>{
     try {
         const userId=req.userId
+        if(!userId){
+            return res.status(401).json({message:"User not authenticated"})
+        }
+        
         const user=await User.findById(userId)
         if(!user){
-            return res.status(400).json({message:"user not found"})
+            return res.status(404).json({message:"User not found"})
         }
 
         return res.status(200).json(user)
     } catch (error) {
+        console.error("Get current user error:", error)
         return res.status(500).json({message:`get current user error ${error}`})
     }
 }
@@ -22,10 +27,14 @@ export const updateUserLocation = async (req, res) => {
     const { latitude, longitude } = req.body;
     const userId = req.userId; // JWT middleware se
 
-    if (typeof latitude !== "number" || typeof longitude !== "number") {
+    // Convert to numbers if they're strings
+    const lat = parseFloat(latitude);
+    const lng = parseFloat(longitude);
+
+    if (isNaN(lat) || isNaN(lng)) {
       return res.status(400).json({
         success: false,
-        message: "Invalid coordinates"
+        message: "Invalid coordinates - must be valid numbers"
       });
     }
 
@@ -33,7 +42,7 @@ export const updateUserLocation = async (req, res) => {
     await User.findByIdAndUpdate(userId, {
       location: {
         type: "Point",
-        coordinates: [longitude, latitude]
+        coordinates: [lng, lat]
       }
     },{new:true});
 
@@ -42,8 +51,8 @@ export const updateUserLocation = async (req, res) => {
     if (io) {
       io.emit("user:location:update", {
         userId,
-        latitude,
-        longitude,
+        latitude: lat,
+        longitude: lng,
         at: new Date()
       });
     }

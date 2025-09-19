@@ -3,6 +3,7 @@ import dotenv from "dotenv"
 dotenv.config()
 import DeliveryAssignment from "../models/deliveryAssignment.model.js";
 import Order from "../models/order.model.js";
+import { createOrderStatusNotification } from "./notification.helpers.js";
 import Shop from "../models/shop.model.js";
 import User from "../models/user.model.js";
 import Razorpay from "razorpay"
@@ -18,7 +19,7 @@ let instance = new Razorpay({
 
 export const placeOrder = async (req, res) => {
   try {
-    const { cartItems, address, paymentMethod } = req.body;
+    const { cartItems, address, paymentMethod, phone } = req.body;
 
     if (!cartItems || cartItems.length === 0) {
       return res.status(400).json({ success: false, message: "Cart is empty" });
@@ -28,6 +29,12 @@ export const placeOrder = async (req, res) => {
       return res.status(400).json({
         success: false,
         message: "Address (text, latitude, longitude) is required",
+      });
+    }
+    if (!phone || phone.length !== 10) {
+      return res.status(400).json({
+        success: false,
+        message: "Valid 10-digit phone is required",
       });
     }
 
@@ -83,6 +90,7 @@ export const placeOrder = async (req, res) => {
       let newOrder = await Order.create({
         user: req.userId,
         address,
+        phone,
         paymentMethod,
         totalAmount,
         shopOrders,
@@ -102,6 +110,7 @@ export const placeOrder = async (req, res) => {
     let newOrder = await Order.create({
       user: req.userId,
       address,
+      phone,
       paymentMethod,
       totalAmount,
       shopOrders,
@@ -112,7 +121,7 @@ export const placeOrder = async (req, res) => {
     user.orders.push(newOrder._id);
     await user.save();
 
-    return res.status(201).json({ success: true, order: newOrder });
+  return res.status(201).json({ success: true, order: newOrder });
   } catch (error) {
     console.error("❌ Place order error:", error);
     return res.status(500).json({ success: false, message: error.message });
@@ -240,6 +249,23 @@ export const updateOwnerOrderStatus = async (req, res) => {
     }
 
     shopOrder.status = status;
+
+    // Send notification to user on status change
+    try {
+      const notif = await createOrderStatusNotification({
+        userId: order.user,
+        orderId: order._id,
+        status,
+        shopName: shopOrder.shop?.name || "Shop"
+      });
+      // Emit notification to user via socket
+      const io = req.app.get("io");
+      if (io && order.user) {
+        io.to(`user_${order.user}`).emit("notification:new", notif);
+      }
+    } catch (e) {
+      console.error("Notification error:", e);
+    }
 
     let deliveryBoysPayload = [];
     let assignment = null;
@@ -546,6 +572,7 @@ export const getCurrentOrder = async (req, res) => {
         _id: assignment.order._id,
         user: assignment.order.user,
         address: assignment.order.address,
+        phone: assignment.order.phone,
         shopOrder,
         deliveryBoyLocation,
         customer,
@@ -648,6 +675,19 @@ export const getOrderById = async (req, res) => {
 
     if (!order) return res.status(404).json({ success: false, message: "Order not found" });
 
+    // Only expose deliveryOtp to the user who placed the order
+    if (order.user && order.user._id && req.userId && order.user._id.toString() === req.userId.toString()) {
+      if (order.shopOrders && Array.isArray(order.shopOrders)) {
+        order.shopOrders.forEach(shopOrder => {
+          // Expose OTP only if not delivered and not expired
+          if (shopOrder.status !== 'delivered' && shopOrder.deliveryOtp && shopOrder.otpExpiresAt && new Date(shopOrder.otpExpiresAt) > new Date()) {
+            shopOrder._showOtp = shopOrder.deliveryOtp;
+          } else {
+            shopOrder._showOtp = null;
+          }
+        });
+      }
+    }
     res.json({ success: true, order });
   } catch (error) {
     console.error("Error fetching order:", error);

@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import { useDispatch } from "react-redux";
 import { setCity } from "../redux/userSlice";
 
-function getCity() {
+function useGetCity() {
   const dispatch = useDispatch();
 
   useEffect(() => {
@@ -27,12 +27,21 @@ function getCity() {
           );
           const data = await response.json();
 
+          const props = data?.features?.[0]?.properties || {};
           let city =
-            data?.features?.[0]?.properties?.city ||
-            data?.features?.[0]?.properties?.town ||
-            data?.features?.[0]?.properties?.village ||
-            data?.features?.[0]?.properties?.state ||
+            props.city ||
+            props.town ||
+            props.village ||
+            props.state ||
             "Unknown";
+
+          // Prefer Kolkata if in West Bengal and city is South Dumdum or similar
+          if (
+            props.state === "West Bengal" &&
+            ["South Dumdum", "North Dumdum", "Baranagar", "Bidhannagar", "Howrah", "Bally", "Unknown"].includes(city)
+          ) {
+            city = "Kolkata";
+          }
 
           dispatch(setCity(city));
         } catch (err) {
@@ -47,4 +56,4 @@ function getCity() {
   }, [dispatch]);
 }
 
-export default getCity;
+export default useGetCity;

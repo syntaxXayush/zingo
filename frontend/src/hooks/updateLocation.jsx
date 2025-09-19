@@ -1,37 +1,47 @@
 import axios from 'axios'
 import React, { useEffect } from 'react'
-import { serverUrl } from '../App'
-import { useDispatch, useSelector } from 'react-redux'
-import {  setShopsOfCity, setUserData } from '../redux/userSlice'
+import { serverUrl } from '../utils/config'
+import { useSelector } from 'react-redux'
 
-function updateLocation() {
+function useUpdateLocation() {
 const {userData,socket}=useSelector(state=>state.user)
-useEffect(()=>{
- 
-async function updateMyLocation(lat, lng) {
-  // API call
-  axios.post(serverUrl+"/api/user/update-location", {
-    latitude: lat,
-    longitude: lng
-  }, { withCredentials: true });
+useEffect(() => {
+  async function updateMyLocation(lat, lng) {
+    try {
+      // Ensure coordinates are numbers
+      const latitude = parseFloat(lat);
+      const longitude = parseFloat(lng);
 
-  // Socket emit
-  socket?.emit("user:location:update", {
-    latitude: lat,
-    longitude: lng
-  });
+      if (isNaN(latitude) || isNaN(longitude)) {
+        console.error("Invalid coordinates:", lat, lng);
+        return;
+      }
+
+      // API call
+      await axios.post(serverUrl + "/api/user/update-location", {
+        latitude,
+        longitude
+      }, { withCredentials: true });
+
+      // Socket emit
+      socket?.emit("user:location:update", {
+        latitude,
+        longitude
+      });
+    } catch (error) {
+      console.error("Failed to update location:", error);
+    }
+  }
+
+  // Har thodi der me location bhejna
+  navigator.geolocation.watchPosition(
+    (pos) => {
+      updateMyLocation(pos.coords.latitude, pos.coords.longitude);
+    },
+    (err) => console.error(err),
+    { enableHighAccuracy: false }
+  );
+}, [userData, socket]);
 }
 
-// Har thodi der me location bhejna
-navigator.geolocation.watchPosition(
-  (pos) => {
-    updateMyLocation(pos.coords.latitude, pos.coords.longitude);
-  },
-  (err) => console.error(err),
-  { enableHighAccuracy: false }
-);
-},[userData])
-}
-
-export default updateLocation
-
+export default useUpdateLocation

@@ -35,7 +35,7 @@ return res.status(201).json({
 export const getItemsByShop=async (req,res)=>{
     try {
         const {shopId}=req.params
-        const items=await Item.find({shop:shopId}).populate("shop")
+        const items=await Item.find({shop:shopId})
         if(!items.length){
            return res.status(400).json({message:"this shop does not have food items"}) 
         }
@@ -46,30 +46,32 @@ export const getItemsByShop=async (req,res)=>{
 }
 
 export const getItemsByCity = async (req, res) => {
-  try {
-    const city = req.params.city
-     // e.g., ?city=Mumbai
-    if (!city) {
-      return res.status(400).json({ message: "City is required" });
+    try {
+        const city = req.params.city;
+        console.log("Requested city:", city); // Debug log
+        if (!city) {
+            return res.status(400).json({ message: "City is required" });
+        }
+
+        // Find all active shops in this city
+        const shopsInCity = await Shop.find({
+            city: { $regex: new RegExp(`^${city}$`, "i") }
+        });
+        console.log("Shops found for city:", shopsInCity.map(s => s.city)); // Debug log
+
+        if (!shopsInCity.length) {
+            return res.status(404).json({ message: "No shops found in this city" });
+        }
+
+        const shopIds = shopsInCity.map((shop) => shop._id);
+
+        // Find items for these shops
+        const items = await Item.find({ shop: { $in: shopIds }, availability: true });
+        return res.status(200).json(items);
+    } catch (error) {
+        console.error("getItemsByCity error:", error); // Debug log
+        return res.status(500).json({ message: "Server error" });
     }
-
-    // Find all active shops in this city
-    const shopsInCity = await Shop.find({
-      city: { $regex: new RegExp(`^${city}$`, "i") }
-    });
-
-    if (!shopsInCity.length) {
-      return res.status(404).json({ message: "No shops found in this city" });
-    }
-
-    const shopIds = shopsInCity.map((shop) => shop._id);
-
-    // Find items for these shops
-    const items = await Item.find({ shop: { $in: shopIds }, availability: true });
-   return res.status(200).json(items);
-  } catch (error) {
-   return res.status(500).json({ message: "Server error" });
-  }
 };
 
 export const getItemById=async (req,res) => {
