@@ -1,3 +1,3 @@
-export const serverUrl = "https://zingo-backend-lozp.onrender.com";
+export const serverUrl = "https://zingo-backend-ru02.onrender.com";
 
 
