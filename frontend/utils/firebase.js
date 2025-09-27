@@ -7,11 +7,11 @@ import { getAuth, GoogleAuthProvider } from "firebase/auth";
 // Your web app's Firebase configuration
 const firebaseConfig = {
   apiKey:import.meta.env.VITE_FIREBASE_APIKEY,
- authDomain: "vingoauth.firebaseapp.com",
-  projectId: "vingoauth",
-  storageBucket: "vingoauth.firebasestorage.app",
-  messagingSenderId: "477598038061",
-  appId: "1:477598038061:web:19fd086a875cef409d20a4"
+ authDomain: "zingo-46c00.firebaseapp.com",
+  projectId: "zingo-46c00",
+  storageBucket: "zingo-46c00.firebasestorage.app",
+  messagingSenderId: "489358730089",
+  appId: "1:489358730089:web:cfcf43e08ab2aeaf6913f8"
 };
 
 // Initialize Firebase
